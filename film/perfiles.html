@@ -1,0 +1,21 @@
+
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"/><title>Perfiles</title><style>
+body{background:#1f1f1f;color:white;font-family:Arial;text-align:center}.perfil{display:inline-block;margin:20px;cursor:pointer}.cuadro{width:120px;height:120px;background:#3fa9f5;border-radius:8px}input{margin-top:20px;padding:10px}.btn{padding:10px;background:red;color:white;border:none;cursor:pointer}.link{display:block;color:white;margin-top:20px}
+</style><meta content="width=device-width, initial-scale=1.0" name="viewport"/></head><body><h1>Perfiles</h1><div id="lista"></div><input id="nuevoPerfil" placeholder="Nombre perfil" type="text"/><button class="btn" onclick="agregarPerfil()">Agregar</button><a class="link" href="filmzone.html">Entrar sin elegir perfil</a>
+<script src="app.js"></script><script>
+let usuario=JSON.parse(localStorage.getItem('usuario')||'null'); if(!token()) location.href='login.html';
+async function cargarPerfiles(){
+ const lista=document.getElementById('lista'); lista.innerHTML='';
+ try{ const res=await fetch('/users/me',{headers:headers()}); usuario=await res.json(); localStorage.setItem('usuario',JSON.stringify(usuario)); }catch(e){}
+ const perfiles=usuario?.perfiles?.length?usuario.perfiles:[usuario?.nombre||'Perfil'];
+ perfiles.forEach(p=>lista.innerHTML+=`<div class="perfil"><div class="cuadro" onclick="entrar('${p}')"></div><p>${p}</p><button class="btn" onclick="eliminarPerfil('${p}')">Eliminar</button></div>`);
+}
+async function agregarPerfil(){
+ const nombre=document.getElementById('nuevoPerfil').value.trim(); if(!nombre) return alert('Escribe un nombre');
+ const res=await fetch('/users/profiles',{method:'POST',headers:headers(),body:JSON.stringify({nombre})});
+ const data=await res.json(); if(res.ok){document.getElementById('nuevoPerfil').value=''; cargarPerfiles();} else alert(data.message || 'No se pudo agregar el perfil');
+}
+async function eliminarPerfil(nombre){ if(!confirm('¿Eliminar perfil?')) return; const res=await fetch(`/users/profiles/${nombre}`,{method:'DELETE',headers:headers()}); const data=await res.json(); if(res.ok){cargarPerfiles();} else alert(data.message || 'No se pudo eliminar'); }
+function entrar(p){localStorage.setItem('perfilActivo',p); location.href='filmzone.html'} cargarPerfiles();
+</script></body></html>

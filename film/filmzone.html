@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<title>FILMZONE</title>
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background-color: #1f1f1f;
+    color: white;
+}
+
+/* NAV */
+header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #141414;
+}
+
+.logo {
+    color: red;
+    font-size: 28px;
+    font-weight: bold;
+    margin-right: 30px;
+}
+
+nav a {
+    color: white;
+    margin-right: 15px;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid #444;
+    cursor: pointer;
+}
+
+nav a:hover {
+    background-color: #333;
+}
+
+nav a.activo {
+    background-color: red;
+    border-color: red;
+}
+
+.search {
+    margin-left: auto;
+}
+
+.search input {
+    padding: 5px;
+    background-color: #333;
+    border: none;
+    color: white;
+}
+
+.user {
+    margin-left: 15px;
+    width: 30px;
+    height: 30px;
+    background-color: #aaa;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* LINKS */
+a {
+    text-decoration: none;
+}
+
+/* SECCIONES */
+.section {
+    padding: 20px;
+    position: relative;
+}
+
+.row-container {
+    display: flex;
+    align-items: center;
+}
+
+/* FLECHAS */
+.arrow {
+    font-size: 30px;
+    cursor: pointer;
+    user-select: none;
+    padding: 10px;
+}
+
+/* SCROLL */
+.row {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+}
+
+/* CARDS */
+.card {
+    position: relative;
+    min-width: 250px;
+    height: 150px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 5px;
+    background: #333;
+}
+
+.card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card.series img {
+    border: 2px solid hotpink;
+}
+
+.card-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,.9));
+    color: white;
+    padding: 28px 10px 8px;
+    font-weight: bold;
+}
+
+.pill {
+    color: #ddd;
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+.empty {
+    color: #aaa;
+    padding: 20px;
+}
+
+/* PERFIL */
+.perfil-container {
+    position: relative;
+}
+
+.menu {
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: #111;
+    padding: 15px;
+    width: 220px;
+    display: none;
+    border-radius: 5px;
+    z-index: 9999;
+}
+
+.menu-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: #333;
+}
+
+.perfil-opcion {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.perfil-opcion div {
+    width: 30px;
+    height: 30px;
+    background: #3fa9f5;
+    margin-right: 10px;
+}
+
+.category-filter {
+    margin-left: 10px;
+    padding: 5px;
+    background: #333;
+    color: white;
+    border: none;
+}
+
+.admin-link {
+    border-color: red !important;
+}
+</style>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/></head>
+<body>
+<header>
+<div class="logo">FILMZONE</div>
+<nav>
+<a class="activo" id="btnInicio" onclick="mostrarTodo()">Inicio</a>
+<a id="btnPeliculas" onclick="mostrarPeliculas()">Películas</a>
+<a id="btnSeries" onclick="mostrarSeries()">Series</a>
+<a class="admin-link" href="admin.html" id="adminLink" style="display:none">
+        Admin
+    </a>
+</nav>
+<div class="search">
+<input id="searchInput" placeholder="Buscar" type="text"/>
+<select class="category-filter" id="categoryFilter">
+<option value="">Todas</option>
+</select>
+</div>
+<div class="perfil-container">
+<div class="user" onclick="toggleMenu()"></div>
+<div class="menu" id="menu">
+<div id="perfilesLista"></div>
+<hr/>
+<div class="menu-item" onclick="window.location.href='perfiles.html'">
+             Administrar perfiles
+        </div>
+<div class="menu-item" onclick="cerrarSesion()">
+             Cerrar sesión
+        </div>
+</div>
+</div>
+</header>
+<!-- PELICULAS -->
+<div class="section" id="peliculas">
+<h2>Películas</h2>
+<div class="row-container">
+<div class="arrow" onclick="scrollRow('movies',-1)">
+             ❮
+        </div>
+<div class="row" id="movies">
+<p class="empty">Cargando películas...</p>
+</div>
+<div class="arrow" onclick="scrollRow('movies',1)">
+             ❯
+        </div>
+</div>
+</div>
+<!-- SERIES -->
+<div class="section" id="series-section">
+<h2>Series</h2>
+<div class="row-container">
+<div class="arrow" onclick="scrollRow('series',-1)">
+             ❮
+        </div>
+<div class="row" id="series">
+<p class="empty">Cargando series...</p>
+</div>
+<div class="arrow" onclick="scrollRow('series',1)">
+             ❯
+        </div>
+</div>
+</div>
+<script src="app.js"></script>
+<script>
+if (!token()) {
+    location.href = 'login.html';
+}
+
+/* SCROLL */
+function scrollRow(id, direction) {
+    const container = document.getElementById(id);
+    const cardWidth = 270;
+    container.scrollLeft += direction * cardWidth;
+}
+
+/* MENU */
+function toggleMenu() {
+    const menu = document.getElementById('menu');
+
+    menu.style.display =
+        menu.style.display === 'block'
+        ? 'none'
+        : 'block';
+}
+
+/* BOTONES NAV */
+function limpiarBotones() {
+    document.getElementById('btnInicio').classList.remove('activo');
+    document.getElementById('btnPeliculas').classList.remove('activo');
+    document.getElementById('btnSeries').classList.remove('activo');
+}
+
+function mostrarTodo() {
+    document.getElementById('peliculas').style.display = 'block';
+    document.getElementById('series-section').style.display = 'block';
+
+    limpiarBotones();
+    document.getElementById('btnInicio').classList.add('activo');
+
+    cargarContenido();
+}
+
+function mostrarPeliculas() {
+    document.getElementById('peliculas').style.display = 'block';
+    document.getElementById('series-section').style.display = 'none';
+
+    limpiarBotones();
+    document.getElementById('btnPeliculas').classList.add('activo');
+
+    cargarContenido();
+}
+
+function mostrarSeries() {
+    document.getElementById('peliculas').style.display = 'none';
+    document.getElementById('series-section').style.display = 'block';
+
+    limpiarBotones();
+    document.getElementById('btnSeries').classList.add('activo');
+
+    cargarContenido();
+}
+
+/* CARD */
+function card(item, tipo) {
+    return `
+        <a href="content.html?type=${tipo}&id=${item._id}">
+            <div class="card ${tipo === 'series' ? 'series' : ''}">
+
+                <img src="${item.imagen_portada}"
+                     alt="${item.titulo}">
+
+                <div class="card-title">
+
+                    ${item.titulo}
+
+                    <div class="pill">
+                        ${item.categoria?.nombre || ''}
+                    </div>
+
+                </div>
+
+            </div>
+        </a>
+    `;
+}
+
+/* CATEGORIAS */
+async function cargarCategorias() {
+    try {
+        const res = await fetch('/categories');
+        const cats = await res.json();
+
+        const sel = document.getElementById('categoryFilter');
+
+        sel.innerHTML = '<option value="">Todas</option>';
+
+        cats.forEach(c => {
+            sel.innerHTML += `
+                <option value="${c._id}">
+                    ${c.nombre}
+                </option>
+            `;
+        });
+
+    } catch (error) {
+        console.error('Error cargando categorías:', error);
+    }
+}
+
+/* CONTENIDO */
+async function cargarContenido() {
+    const q = document.getElementById('searchInput').value.trim();
+    const cat = document.getElementById('categoryFilter').value;
+
+    const movieUrl = cat
+        ? `/movies/category/${cat}`
+        : `/movies?query=${encodeURIComponent(q)}`;
+
+    const seriesUrl = cat
+        ? `/series/category/${cat}`
+        : `/series?query=${encodeURIComponent(q)}`;
+
+    try {
+        const [mRes, sRes] = await Promise.all([
+            fetch(movieUrl),
+            fetch(seriesUrl)
+        ]);
+
+        const movies = await mRes.json();
+        const series = await sRes.json();
+
+        const moviesContainer = document.getElementById('movies');
+        const seriesContainer = document.getElementById('series');
+
+        moviesContainer.innerHTML = '';
+        seriesContainer.innerHTML = '';
+
+        if (Array.isArray(movies) && movies.length > 0) {
+            movies.forEach(movie => {
+                moviesContainer.innerHTML += card(movie, 'movie');
+            });
+        } else {
+            moviesContainer.innerHTML =
+                '<p class="empty">No hay películas</p>';
+        }
+
+        if (Array.isArray(series) && series.length > 0) {
+            series.forEach(serie => {
+                seriesContainer.innerHTML += card(serie, 'series');
+            });
+        } else {
+            seriesContainer.innerHTML =
+                '<p class="empty">No hay series</p>';
+        }
+
+    } catch (error) {
+        console.error('Error cargando contenido:', error);
+
+        document.getElementById('movies').innerHTML =
+            '<p class="empty">Error cargando películas</p>';
+
+        document.getElementById('series').innerHTML =
+            '<p class="empty">Error cargando series</p>';
+    }
+}
+
+/* PERFILES */
+function cargarPerfilesMenu() {
+    const lista = document.getElementById('perfilesLista');
+
+    const usuario =
+        JSON.parse(localStorage.getItem('usuario') || '{}');
+
+    if (usuario.tipo_usuario === 'admin') {
+        document.getElementById('adminLink').style.display = 'inline-block';
+    }
+
+    lista.innerHTML = '';
+
+    (usuario.perfiles || [usuario.nombre || 'Perfil'])
+    .forEach(p => {
+        lista.innerHTML += `
+            <div class="perfil-opcion"
+                 onclick="cambiarPerfil('${p}')">
+
+                <div></div>
+
+                <span>${p}</span>
+
+            </div>
+        `;
+    });
+}
+
+function cambiarPerfil(nombre) {
+    localStorage.setItem('perfilActivo', nombre);
+    alert('Perfil cambiado a: ' + nombre);
+}
+
+/* EVENTOS */
+document.getElementById('searchInput')
+    .addEventListener('input', cargarContenido);
+
+document.getElementById('categoryFilter')
+    .addEventListener('change', cargarContenido);
+
+/* INIT */
+cargarCategorias();
+cargarContenido();
+cargarPerfilesMenu();
+</script>
+</body>
+</html>

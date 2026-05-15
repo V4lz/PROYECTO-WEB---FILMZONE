@@ -1,0 +1,15 @@
+
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"/><title>Registro</title><style>
+body{background:#1f1f1f;color:white;font-family:Arial;text-align:center}input{width:300px;padding:10px;margin:10px}.btn{padding:10px 20px;background:red;color:white;border:none;cursor:pointer}#error{color:#ff4c4c;font-size:14px}a{color:white}
+</style><meta content="width=device-width, initial-scale=1.0" name="viewport"/></head><body><h1>Registro</h1>
+<input id="nombre" placeholder="Nombre" type="text"/><br/><input id="correo" placeholder="Correo" type="email"/><br/><input id="pass" placeholder="Contraseña" type="password"/><br/><p id="error"></p><button class="btn" onclick="registrar()">Registrarse</button><p><a href="login.html">Ya tengo cuenta</a></p>
+<script>
+async function registrar(){
+ const nombre=document.getElementById('nombre').value.trim(); const email=document.getElementById('correo').value.trim(); const password=document.getElementById('pass').value.trim(); const error=document.getElementById('error'); error.textContent=''; error.style.color='#ff4c4c';
+ if(!nombre||!email||!password){error.textContent='Por favor llena todos los campos'; return;}
+ try{ const res=await fetch('/users/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,email,password})}); const data=await res.json();
+  if(!res.ok){error.textContent=data.message||'No se pudo registrar'; return;} error.style.color='lightgreen'; error.textContent='Registro exitoso 🎉'; setTimeout(()=>location.href='login.html',800);
+ }catch(e){error.textContent='No se pudo conectar con el servidor';}
+}
+</script></body></html>

@@ -1,0 +1,13 @@
+
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"/><title>Información</title><style>
+body{margin:0;font-family:Arial;background-color:#1f1f1f;color:white;text-align:center}.container{padding:40px}.video{margin:20px auto;width:70%;max-width:800px}.video iframe{width:100%;height:450px;border-radius:10px}h1{font-size:50px;margin-top:20px}.descripcion{margin-top:20px;font-size:18px;line-height:1.6;max-width:900px;margin-left:auto;margin-right:auto}.btn{margin-top:30px;padding:10px 20px;background-color:red;color:white;border:none;cursor:pointer;font-size:16px}.btn:hover{background-color:darkred}.meta{color:#bbb}
+</style><meta content="width=device-width, initial-scale=1.0" name="viewport"/></head><body><div class="container"><div class="video"><iframe allowfullscreen="" frameborder="0" id="trailer"></iframe></div><h1 id="titulo">Cargando...</h1><div class="meta" id="meta"></div><div class="descripcion" id="descripcion"></div><a href="filmzone.html"><button class="btn">⬅ Volver</button></a></div>
+<script src="app.js"></script><script>
+async function cargar(){
+ const params=new URLSearchParams(location.search); const id=params.get('id'); const type=params.get('type')==='series'?'series':'movies';
+ const res=await fetch(`/${type}/${id}`); const item=await res.json();
+ document.getElementById('titulo').textContent=item.titulo||'Contenido no encontrado'; document.getElementById('descripcion').textContent=item.descripcion||''; document.getElementById('meta').textContent=item.categoria?.nombre?`Categoría: ${item.categoria.nombre}`:''; document.getElementById('trailer').src=youtubeEmbed(item.url_trailer);
+ if(token()) fetch('/history',{method:'POST',headers:headers(),body:JSON.stringify({contenido:id,tipo_contenido:type==='series'?'series':'movie'})}).catch(()=>{});
+} cargar();
+</script></body></html>

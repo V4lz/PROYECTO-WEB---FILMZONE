@@ -1,0 +1,16 @@
+
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"/><title>Login</title><style>
+body{background:#1f1f1f;color:white;font-family:Arial;text-align:center}input{width:300px;padding:10px;margin:10px}.btn{padding:10px 20px;background:red;color:white;border:none;cursor:pointer}#error{font-size:14px;color:#ff4c4c}a{color:white}
+</style><meta content="width=device-width, initial-scale=1.0" name="viewport"/></head><body><h1>Iniciar Sesión</h1>
+<input id="correo" placeholder="Correo" type="text"/><br/><input id="pass" placeholder="Contraseña" type="password"/><br/><p id="error"></p><button class="btn" onclick="login()">Entrar</button><p><a href="registro.html">Crear cuenta</a></p>
+<script src="app.js"></script><script>
+async function login(){
+ const email=document.getElementById('correo').value.trim(); const password=document.getElementById('pass').value.trim(); const error=document.getElementById('error'); error.textContent='';
+ if(!email||!password){error.textContent='Por favor llena todos los campos'; return;}
+ try{ const res=await fetch('/users/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})}); const data=await res.json();
+  if(!res.ok){error.textContent=data.message||'No se pudo iniciar sesión'; return;}
+  localStorage.setItem('token',data.token); localStorage.setItem('usuario',JSON.stringify(data.user)); error.style.color='lightgreen'; error.textContent='Inicio de sesión exitoso'; setTimeout(()=>location.href='perfiles.html',700);
+ }catch(e){error.textContent='No se pudo conectar con el servidor';}
+}
+</script></body></html>
